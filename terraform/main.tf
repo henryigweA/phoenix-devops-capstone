@@ -117,5 +117,43 @@ resource "azurerm_log_analytics_workspace" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   sku                 = "PerGB2018"
-  retention_in_days    = 30
+  retention_in_days   = 30
+}
+
+resource "azurerm_monitor_action_group" "phoenix_alerts" {
+  name                = "ag-phoenix-alerts"
+  resource_group_name = azurerm_resource_group.main.name
+  short_name          = "phoenixag"
+
+  email_receiver {
+    name                    = "devops-email"
+    email_address           = "itzkeshymor1@gmail.com"
+    use_common_alert_schema = true
+  }
+}
+
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "phoenix_api_restarts" {
+  name                 = "phoenix-api-restart-alert"
+  resource_group_name  = azurerm_resource_group.main.name
+  location             = azurerm_resource_group.main.location
+  evaluation_frequency = "PT5M"
+  window_duration      = "PT5M"
+  scopes               = [azurerm_log_analytics_workspace.main.id]
+  severity             = 2
+
+  criteria {
+    query                   = <<-QUERY
+      KubePodInventory
+      | where Name contains "phoenix-api"
+      | summarize arg_max(TimeGenerated, PodRestartCount) by Name
+    QUERY
+    time_aggregation_method = "Maximum"
+    threshold               = 2
+    operator                = "GreaterThan"
+    metric_measure_column   = "PodRestartCount"
+  }
+
+  action {
+    action_groups = [azurerm_monitor_action_group.phoenix_alerts.id]
+  }
 }
