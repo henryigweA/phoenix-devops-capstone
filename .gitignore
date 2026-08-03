@@ -1,5 +1,3 @@
-cd /c/Users/PC/Downloads/Phoenix
-cat > .gitignore << 'EOF'
 .venv/
 __pycache__/
 *.pyc

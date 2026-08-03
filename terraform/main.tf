@@ -99,6 +99,10 @@ resource "azurerm_kubernetes_cluster" "main" {
   identity {
     type = "SystemAssigned"
   }
+
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  }
 }
 
 resource "azurerm_role_assignment" "aks_acr_pull" {
@@ -106,4 +110,12 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   role_definition_name             = "AcrPull"
   scope                            = azurerm_container_registry.main.id
   skip_service_principal_aad_check = true
+}
+
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "log-phoenix-dev"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "PerGB2018"
+  retention_in_days    = 30
 }
