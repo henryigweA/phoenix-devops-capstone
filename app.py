@@ -37,6 +37,10 @@ def health():
     """Used by load balancers, Kubernetes probes, and monitoring."""
     return jsonify(status="ok"), 200
 
+@app.get("/health")
+def health():
+    return jsonify(status="ok", version="1.1"), 200
+
 
 @app.get("/products")
 def list_products():
