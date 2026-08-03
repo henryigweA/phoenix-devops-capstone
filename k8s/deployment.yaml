@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phoenix-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phoenix-api
+  template:
+    metadata:
+      labels:
+        app: phoenix-api
+    spec:
+      containers:
+        - name: phoenix-api
+          image: acrphoenixdev001.azurecr.io/phoenix-api:1.0
+          ports:
+            - containerPort: 5000
